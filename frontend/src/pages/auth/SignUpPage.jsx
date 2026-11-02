@@ -23,7 +23,7 @@ export const SignUpPage = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const { signup } = useAuth();
+  const { signup, socialLogin } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
   const passwordRequirements = getPasswordRequirements(formData.password);
@@ -35,6 +35,19 @@ export const SignUpPage = () => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
+  };
+
+  const handleSocialLogin = async (provider) => {
+    setError('');
+    try {
+      await socialLogin(provider);
+      const providerName = provider === 'github' ? 'GitHub' : provider[0].toUpperCase() + provider.slice(1);
+      toast.success(`Signed in with ${providerName}`);
+      navigate('/app', { replace: true });
+    } catch (err) {
+      setError(err.message || 'Social sign-in failed. Please try again.');
+      toast.error('Social sign-in failed');
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -114,7 +127,7 @@ export const SignUpPage = () => {
           type="button"
           aria-label="Sign up with Google"
           title="Sign up with Google"
-          onClick={() => toast.info('Google SSO ready')}
+          onClick={() => handleSocialLogin('google')}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -138,7 +151,7 @@ export const SignUpPage = () => {
           type="button"
           aria-label="Sign up with LinkedIn"
           title="Sign up with LinkedIn"
-          onClick={() => toast.info('LinkedIn SSO ready')}
+          onClick={() => handleSocialLogin('linkedin')}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -162,7 +175,7 @@ export const SignUpPage = () => {
           type="button"
           aria-label="Sign up with GitHub"
           title="Sign up with GitHub"
-          onClick={() => toast.info('GitHub SSO ready')}
+          onClick={() => handleSocialLogin('github')}
           style={{
             display: 'flex',
             alignItems: 'center',

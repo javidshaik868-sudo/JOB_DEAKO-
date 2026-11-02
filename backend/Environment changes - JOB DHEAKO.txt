@@ -1,0 +1,33 @@
+# Terminal Environment Changes
+
+## Extension: GitHub.copilot-chat
+
+Enables use of `copilot-debug` and `copilot` commands in the terminal
+
+- `COPILOT_DEBUG_NONCE=4322035599700341155c9f487bf7e278`
+- `PATH=c:\Users\SHAIK JAVID\AppData\Roaming\Code\User\globalStorage\github.copilot-chat\debugCommand;c:\Users\SHAIK JAVID\AppData\Roaming\Code\User\globalStorage\github.copilot-chat\copilotCli;${env:PATH}`
+
+## Extension: vscode.git
+
+Enables the following features: git auth provider
+
+- `GIT_ASKPASS=c:\Users\SHAIK JAVID\AppData\Roaming\Code\User\globalStorage\vscode.git\askpass\70789581cae28aa7\askpass.sh`
+- `VSCODE_GIT_ASKPASS_NODE=C:\Users\SHAIK JAVID\AppData\Local\Programs\Microsoft VS Code\Code.exe`
+- `VSCODE_GIT_ASKPASS_EXTRA_ARGS=`
+- `VSCODE_GIT_ASKPASS_MAIN=c:\Users\SHAIK JAVID\AppData\Roaming\Code\User\globalStorage\vscode.git\askpass\70789581cae28aa7\askpass-main.js`
+- `VSCODE_GIT_IPC_HANDLE=\\.\pipe\vscode-git-525b34bb08-sock`
+
+## Extension: ms-python.debugpy
+
+Enables use of [no-config debugging](https://github.com/microsoft/vscode-python-debugger/wiki/No%E2%80%90Config-Debugging), `debugpy <script.py>`, in the terminal.
+
+- `PYDEVD_DISABLE_FILE_VALIDATION=1`
+- `VSCODE_DEBUGPY_ADAPTER_ENDPOINTS=c:\Users\SHAIK JAVID\.vscode\extensions\ms-python.debugpy-2026.6.0-win32-x64\.noConfigDebugAdapterEndpoints\endpoint-74248908ed73085e.txt`
+- `PATH=${env:PATH};c:\Users\SHAIK JAVID\.vscode\extensions\ms-python.debugpy-2026.6.0-win32-x64\bundled\scripts\noConfigScripts`
+- `BUNDLED_DEBUGPY_PATH=c:\Users\SHAIK JAVID\.vscode\extensions\ms-python.debugpy-2026.6.0-win32-x64\bundled\libs\debugpy`
+
+## Extension: ms-python.python
+
+Enables `python.terminal.shellIntegration.enabled` by modifying `PYTHONSTARTUP`
+
+- `PYTHONSTARTUP=c:\Users\SHAIK JAVID\AppData\Roaming\Code\User\workspaceStorage\ecbbfc9f3b3ad07cd6017c12b6809f77\ms-python.python\pythonrc.py`

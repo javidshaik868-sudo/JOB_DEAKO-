@@ -54,6 +54,17 @@ export const AuthProvider = ({ children }) => {
     return authApi.signup(data);
   };
 
+  const socialLogin = async (provider) => {
+    setIsLoading(true);
+    try {
+      const res = await authApi.socialLogin(provider);
+      setUser(res.user);
+      return res;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const resendOTP = async (email) => authApi.resendOtp({ email });
 
   const verifyOTP = async (data) => {
@@ -102,6 +113,7 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     signup,
+    socialLogin,
     resendOTP,
     verifyOTP,
     forgotPassword,

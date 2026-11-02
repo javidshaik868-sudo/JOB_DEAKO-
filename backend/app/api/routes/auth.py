@@ -221,6 +221,39 @@ async def verify_otp(payload: dict):
     return response
 
 
+@router.post("/auth/social/{provider}")
+async def social_login(provider: str, payload: dict | None = None):
+    provider = provider.lower().strip()
+    provider_names = {"google": "Google", "linkedin": "LinkedIn", "github": "GitHub"}
+    if provider not in provider_names:
+        raise HTTPException(status_code=400, detail="Unsupported social sign-in provider")
+
+    email = f"{provider}-demo@jobdheko.local"
+    display_name = f"{provider_names[provider]} Demo User"
+
+    with SessionLocal.begin() as session:
+        user = session.scalar(select(UserAccount).where(UserAccount.email == email))
+        if user is None:
+            user = UserAccount(
+                id=str(uuid.uuid4()),
+                email=email,
+                full_name=display_name,
+                password_hash=hash_password(secrets.token_urlsafe(32)),
+                role="candidate",
+                is_verified=True,
+            )
+            session.add(user)
+            session.flush()
+        elif not user.is_verified:
+            user.is_verified = True
+
+        session.expunge(user)
+        public = public_user(user)
+        token = create_access_token(user)
+
+    return {"token": token, "user": public}
+
+
 @router.post("/auth/login")
 async def login(payload: dict):
     email = _normalized_email(payload.get("email"))

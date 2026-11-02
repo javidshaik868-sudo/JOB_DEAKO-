@@ -13,6 +13,14 @@ export const authApi = {
     return api.post('/auth/signup', data);
   },
 
+  async socialLogin(provider) {
+    const response = await api.post(`/auth/social/${provider}`, {});
+    if (response?.token) {
+      setAuthToken(response.token);
+    }
+    return response;
+  },
+
   async resendOtp({ email }) {
     return api.post('/auth/resend-otp', { email });
   },

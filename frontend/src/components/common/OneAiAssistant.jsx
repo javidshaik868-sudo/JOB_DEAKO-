@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Icon } from '../icons/Icon';
 import { Orb3dDots } from './Orb3dDots';
 import { assistantApi } from '../../services/assistantApi';
@@ -11,6 +12,9 @@ const prompts = [
 ];
 
 export const OneAiAssistant = () => {
+  const location = useLocation();
+  const currentJobIdMatch = location.pathname.match(/^\/app\/jobs\/([^/]+)$/);
+  const currentJobId = currentJobIdMatch?.[1] || null;
   const [isOpen, setIsOpen] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [message, setMessage] = useState('');
@@ -123,7 +127,7 @@ export const OneAiAssistant = () => {
         sessionIdRef.current = session.sessionId;
       }
 
-      const response = await assistantApi.sendMessage(sessionIdRef.current, trimmedMessage);
+      const response = await assistantApi.sendMessage(sessionIdRef.current, trimmedMessage, currentJobId);
       setMessages((currentMessages) => currentMessages.map((chatMessage) => (
         chatMessage.id === assistantMessageId
           ? { ...chatMessage, text: response.reply || 'oneAi did not return a reply.' }

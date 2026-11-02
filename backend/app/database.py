@@ -103,10 +103,24 @@ def _initial_state() -> dict[str, Any]:
 def initialize_database() -> None:
     _ensure_database_exists()
     Base.metadata.create_all(bind=engine)
+    defaults = _initial_state()
     with SessionLocal.begin() as session:
-        for key, value in _initial_state().items():
-            if session.get(AppState, key) is None:
+        for key, value in defaults.items():
+            record = session.get(AppState, key)
+            if record is None:
                 session.add(AppState(key=key, value=deepcopy(value)))
+                continue
+
+            existing = record.value
+            if not existing:
+                record.value = deepcopy(value)
+            elif key == "jobs" and isinstance(existing, list):
+                existing_ids = {item.get("id") for item in existing if isinstance(item, dict)}
+                merged_jobs = deepcopy(existing)
+                for job in value:
+                    if job.get("id") not in existing_ids:
+                        merged_jobs.append(deepcopy(job))
+                record.value = merged_jobs
 
 
 def load_state(key: str) -> Any:

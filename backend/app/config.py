@@ -1,3 +1,4 @@
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Literal
 
@@ -14,7 +15,7 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 30
 
     llm_provider: Literal["mock", "ollama"] = "ollama"
-    ollama_base_url: str = "http://localhost:11434"
+    ollama_base_url: str = Field(default="http://localhost:11434", validation_alias="OLLAMA_URL")
     ollama_model: str = "jobdheako-career"
     whisper_model: str = "base"
     whisper_device: Literal["cpu", "cuda", "auto"] = "cpu"

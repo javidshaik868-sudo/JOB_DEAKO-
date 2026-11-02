@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.api.dependencies import get_current_user
@@ -22,21 +24,57 @@ async def list_jobs(
 ):
     jobs = load_state("jobs")
     if q:
-        jobs = [job for job in jobs if q.lower() in job["title"].lower() or q.lower() in job["company"].lower()]
+        terms = [term for term in q.lower().replace("/", " ").split() if len(term) > 1]
+        filtered = []
+        for job in jobs:
+            searchable = " ".join([
+                job.get("title", ""), job.get("company", ""), job.get("location", ""),
+                job.get("description", ""), " ".join(job.get("skills", [])),
+            ]).lower()
+            if any(term in searchable for term in terms):
+                filtered.append(job)
+        jobs = filtered
     if location:
         jobs = [job for job in jobs if location.lower() in job["location"].lower()]
     if workMode:
         jobs = [job for job in jobs if job["workMode"].lower() == workMode.lower()]
     if experience:
-        jobs = [job for job in jobs if experience.lower() in job["experience"].lower()]
+        match = re.search(r"(\d+)\s*-\s*(\d+|\+)", experience)
+        if match:
+            requested_min = int(match.group(1))
+            requested_max = None if match.group(2) == "+" else int(match.group(2))
+            compatible = []
+            for job in jobs:
+                ranges = re.findall(r"(\d+)\s*-\s*(\d+)", job.get("experience", ""))
+                plus_range = re.search(r"(\d+)\s*\+", job.get("experience", ""))
+                if ranges:
+                    job_min, job_max = int(ranges[0][0]), int(ranges[0][1])
+                elif plus_range:
+                    job_min, job_max = int(plus_range.group(1)), 99
+                else:
+                    continue
+                if requested_max is None:
+                    overlaps = job_max >= requested_min
+                else:
+                    overlaps = job_min <= requested_max and job_max >= requested_min
+                if overlaps:
+                    compatible.append(job)
+            jobs = compatible
+        else:
+            jobs = [job for job in jobs if experience.lower() in job["experience"].lower()]
     if jobType:
         jobs = [job for job in jobs if job["jobType"].lower() == jobType.lower()]
     if skills:
         skill_values = [skill.strip().lower() for skill in skills.split(",") if skill.strip()]
         jobs = [job for job in jobs if any(skill.lower() in [s.lower() for s in job["skills"]] for skill in skill_values)]
 
-    if sort == "salary_high_to_low":
-        jobs = sorted(jobs, key=lambda item: item["salary"], reverse=True)
+    if sort in {"salary", "salary_high_to_low"}:
+        def salary_floor(item: dict) -> int:
+            numbers = [int(value.replace(",", "")) for value in re.findall(r"\d+", item.get("salary", "0"))]
+            return numbers[0] if numbers else 0
+        jobs = sorted(jobs, key=salary_floor, reverse=True)
+    elif sort == "relevance":
+        jobs = sorted(jobs, key=lambda item: item.get("matchScore", 0), reverse=True)
 
     page_size = 10
     start = (page - 1) * page_size

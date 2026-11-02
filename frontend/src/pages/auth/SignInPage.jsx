@@ -13,12 +13,24 @@ export const SignInPage = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const { login } = useAuth();
+  const { login, socialLogin } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
   const location = useLocation();
 
   const from = location.state?.from?.pathname || '/app';
+
+  const handleSocialLogin = async (provider) => {
+    setError('');
+    try {
+      await socialLogin(provider);
+      toast.success(`Signed in with ${provider === 'github' ? 'GitHub' : provider[0].toUpperCase() + provider.slice(1)}`);
+      navigate(from, { replace: true });
+    } catch (err) {
+      setError(err.message || 'Social sign-in failed. Please try again.');
+      toast.error('Social sign-in failed');
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -72,7 +84,7 @@ export const SignInPage = () => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem', marginBottom: '1.5rem' }}>
         <button
           type="button"
-          onClick={() => toast.info('Google SSO integration ready for backend OAuth')}
+          onClick={() => handleSocialLogin('google')}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -95,7 +107,7 @@ export const SignInPage = () => {
 
         <button
           type="button"
-          onClick={() => toast.info('LinkedIn SSO integration ready for backend OAuth')}
+          onClick={() => handleSocialLogin('linkedin')}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -118,7 +130,7 @@ export const SignInPage = () => {
 
         <button
           type="button"
-          onClick={() => toast.info('GitHub SSO integration ready for backend OAuth')}
+          onClick={() => handleSocialLogin('github')}
           style={{
             display: 'flex',
             alignItems: 'center',
